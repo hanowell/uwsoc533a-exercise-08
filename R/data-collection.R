@@ -19,12 +19,10 @@ CHLasfrRR <- HMDHFDplus::readHFDweb(
   dplyr::select(-Year, -OpenInterval)
 saveRDS(CHLasfrRR, "data/CHLasfrRR.rds")
 
-## Period life tables ----
-
-### Males ----
-mltper_5x1 <- HMDHFDplus::readHMDweb(
+## Person-years
+Exposures_5x1 <- HMDHFDplus::readHMDweb(
   CNTRY = "CHL",
-  item = "mltper_5x1",
+  item = "Exposures_5x1",
   username = keyring::key_list("human-mortality-database")$username,
   password = keyring::key_get(
     service = "human-mortality-database",
@@ -32,8 +30,8 @@ mltper_5x1 <- HMDHFDplus::readHMDweb(
   )
 ) %>%
   dplyr::filter(Year == 1992) %>%
-dplyr::select(-Year, -OpenInterval)
-saveRDS(mltper_5x1, "data/mltper_5x1.rds")
+  dplyr::select(-Year, -Male, -Total, -OpenInterval)
+saveRDS(Exposures_5x1, "data/Exposures_5x1.rds")
 
 ### Females ----
 fltper_5x1 <- HMDHFDplus::readHMDweb(

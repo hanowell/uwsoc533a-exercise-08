@@ -252,7 +252,7 @@ div.tocify {
 <h1 class="unnumbered">Introduction</h1>
 <p><strong>In this assignment, I will:</strong></p>
 <ol style="list-style-type: decimal">
-<li><strong>Walk you through the projection of a two-sex closed population assuming constant age-specific fertility and mortality rates</strong></li>
+<li><strong>Walk you through the projection of a one-sex closed population using the cohort component method (CCM), assuming constant age- and sex-specific fertility and mortality rates</strong></li>
 <li><strong>Ask you some questions along the way</strong></li>
 <li><strong>Including some questions about the assumptions of the open one-sex population projection model we studied in class</strong></li>
 </ol>
@@ -262,7 +262,6 @@ div.tocify {
 <div id="data-collection" class="section level1 unnumbered">
 <h1 class="unnumbered">Data collection</h1>
 <pre class="r"><code>CHLasfrRR &lt;- readRDS(&quot;data/CHLasfrRR.rds&quot;)
-mltper_5x1 &lt;- readRDS(&quot;data/mltper_5x1.rds&quot;)
 fltper_5x1 &lt;- readRDS(&quot;data/fltper_5x1.rds&quot;)</code></pre>
 </div>
 <div id="about-the-data" class="section level1 unnumbered">
@@ -270,9 +269,36 @@ fltper_5x1 &lt;- readRDS(&quot;data/fltper_5x1.rds&quot;)</code></pre>
 <p>You’ve just loaded the following data from Chile in 1992:</p>
 <ul>
 <li><strong><code>CHLasfrRR</code> gives the annual period age-specific fertility rate (<code>ASFR</code>) by five-year (<code>Age</code>) groups. The data comes from the <a href="https://www.humanfertility.org/">Human Fertility Database</a> (HFD).</strong></li>
-<li><strong><code>mltper_5x1</code> gives the annual period life table for males in five-year age groups. The life table comes from the <a href="https://mortality.org/">Human Mortality Database</a> (HMD). with the typical columns we’ve seen in previous weeks, except the exact age at the beginning of the interval is a column called <code>Age</code> rather than <code>x</code> (to facilitate joins to the ASFR data; it’s also the original name of the column in the HMD).</strong></li>
-<li><strong><code>fltper_5x1</code> is the corresponding life table for females.</strong></li>
+<li><strong><code>fltper_5x1</code> gives the annual period life table for females in five-year age groups. The life table comes from the <a href="https://mortality.org/">Human Mortality Database</a> (HMD). with the typical columns we’ve seen in previous weeks, except the exact age at the beginning of the interval is a column called <code>Age</code> rather than <code>x</code> (to facilitate joins to the ASFR data; it’s also the original name of the column in the HMD).</strong></li>
 </ul>
+</div>
+<div id="save-the-radix-for-the-life-tables" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Save the radix for the life tables</h1>
+<p><strong>In the subsequent steps, don’t overwrite the original data that provides <span class="math inline">\(l_0\)</span> for males and females, respectively. Don’t do this for two reasons:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>For when you are projecting a population with more than one sex (or, more generally, more subgroups), saving the radix of each subgroup allows you to check whether the life tables have the same or different radices</strong></li>
+<li><strong>You need the radix in subsequent steps even though in the next step you will collapse the two youngest age groups</strong></li>
+</ol>
+</div>
+<div id="heres-a-question-for-you" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Here’s a question for you…</h1>
+<p><strong>Why might you have life tables with a different radix for each sex?</strong></p>
+<p><strong>Answer below:</strong></p>
+</div>
+<div id="collapse-the-age-specific-person-years-_nl_x-for-the-two-youngest-age-groups" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Collapse the age-specific person-years <span class="math inline">\({}_nL_x\)</span> for the two youngest age groups</h1>
+<p><strong>You need to collapse the first two age groups for each life table because we will project age-specific populations with age intervals of equal length to the projection interval (in this case, five years).</strong></p>
+</div>
+<div id="another-question" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Another question…</h1>
+<p><strong>Why is it convenient to assume age and projection intervals of equal length (i.e. what extra work would we have to do if projection and age intervals were of unequal length)?</strong></p>
+<p><strong>Answer below:</strong></p>
+</div>
+<div id="project-survivorship" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Project survivorship</h1>
+<div id="section" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> </h2>
+</div>
 </div>
 
 

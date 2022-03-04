@@ -14,7 +14,7 @@ output:
 
 **In this assignment, I will:**
 
-1. **Walk you through the projection of a two-sex closed population assuming constant age-specific fertility and mortality rates**
+1. **Walk you through the projection of a one-sex closed population using the cohort component method (CCM), assuming constant age- and sex-specific fertility and mortality rates**
 1. **Ask you some questions along the way**
 1. **Including some questions about the assumptions of the open one-sex population projection model we studied in class**
 
@@ -26,7 +26,6 @@ output:
 
 ```{r}
 CHLasfrRR <- readRDS("data/CHLasfrRR.rds")
-mltper_5x1 <- readRDS("data/mltper_5x1.rds")
 fltper_5x1 <- readRDS("data/fltper_5x1.rds")
 ```
 
@@ -35,5 +34,43 @@ fltper_5x1 <- readRDS("data/fltper_5x1.rds")
 You've just loaded the following data from Chile in 1992:
 
 * **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year (`Age`) groups. The data comes from the [Human Fertility Database](https://www.humanfertility.org/) (HFD).**
-* **`mltper_5x1` gives the annual period life table for males in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). with the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (to facilitate joins to the ASFR data; it's also the original name of the column in the HMD).**
-* **`fltper_5x1` is the corresponding life table for females.**
+* **`fltper_5x1` gives the annual period life table for females in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). with the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (to facilitate joins to the ASFR data; it's also the original name of the column in the HMD).**
+
+# Save the radix for the life tables
+
+**In the subsequent steps, don't overwrite the original data that provides $l_0$ for males and females, respectively. Don't do this for two reasons:**
+
+1. **For when you are projecting a population with more than one sex (or, more generally, more subgroups), saving the radix of each subgroup allows you to check whether the life tables have the same or different radices**
+1. **You need the radix in subsequent steps even though in the next step you will collapse the two youngest age groups**
+
+```{r}
+
+```
+
+# Here's a question for you...
+
+**Why might you have life tables with a different radix for each sex?**
+
+**Answer below:**
+
+
+
+# Collapse the age-specific person-years ${}_nL_x$ for the two youngest age groups
+
+**You need to collapse the first two age groups for each life table because we will project age-specific populations with age intervals of equal length to the projection interval (in this case, five years).**
+
+```{r}
+
+```
+
+# Another question...
+
+**Why is it convenient to assume age and projection intervals of equal length (i.e. what extra work would we have to do if projection and age intervals were of unequal length)?**
+
+**Answer below:**
+
+
+
+# Project survivorship
+
+## 
