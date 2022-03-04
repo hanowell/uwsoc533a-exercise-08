@@ -262,14 +262,15 @@ div.tocify {
 <div id="data-collection" class="section level1 unnumbered">
 <h1 class="unnumbered">Data collection</h1>
 <pre class="r"><code>CHLasfrRR &lt;- readRDS(&quot;data/CHLasfrRR.rds&quot;)
-fltper_5x1 &lt;- readRDS(&quot;data/fltper_5x1.rds&quot;)</code></pre>
+fltper_5x1 &lt;- readRDS(&quot;data/fltper_5x1.rds&quot;)
+Population &lt;- readRDS(&quot;data/Population.rds&quot;)</code></pre>
 </div>
 <div id="about-the-data" class="section level1 unnumbered">
 <h1 class="unnumbered">About the data</h1>
 <p>You’ve just loaded the following data from Chile in 1992:</p>
 <ul>
 <li><strong><code>CHLasfrRR</code> gives the annual period age-specific fertility rate (<code>ASFR</code>) by five-year (<code>Age</code>) groups. The data comes from the <a href="https://www.humanfertility.org/">Human Fertility Database</a> (HFD).</strong></li>
-<li><strong><code>fltper_5x1</code> gives the annual period life table for females in five-year age groups. The life table comes from the <a href="https://mortality.org/">Human Mortality Database</a> (HMD). with the typical columns we’ve seen in previous weeks, except the exact age at the beginning of the interval is a column called <code>Age</code> rather than <code>x</code> (to facilitate joins to the ASFR data; it’s also the original name of the column in the HMD).</strong></li>
+<li><strong><code>fltper_5x1</code> gives the annual period life table for females in five-year age groups. The life table comes from the <a href="https://mortality.org/">Human Mortality Database</a> (HMD). with the typical columns we’ve seen in previous weeks, except the exact age at the beginning of the interval is a column called <code>Age</code> rather than <code>x</code> (to facilitate joins to the ASFR data; it’s also the original name of the column in the HMD).</strong> * ****</li>
 </ul>
 </div>
 <div id="save-the-radix-for-the-life-tables" class="section level1" number="1">

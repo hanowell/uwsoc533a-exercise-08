@@ -27,6 +27,7 @@ output:
 ```{r}
 CHLasfrRR <- readRDS("data/CHLasfrRR.rds")
 fltper_5x1 <- readRDS("data/fltper_5x1.rds")
+Population <- readRDS("data/Population.rds")
 ```
 
 # About the data {.unnumbered}
@@ -35,6 +36,7 @@ You've just loaded the following data from Chile in 1992:
 
 * **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year (`Age`) groups. The data comes from the [Human Fertility Database](https://www.humanfertility.org/) (HFD).**
 * **`fltper_5x1` gives the annual period life table for females in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). with the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (to facilitate joins to the ASFR data; it's also the original name of the column in the HMD).**
+* ****
 
 # Save the radix for the life tables
 
