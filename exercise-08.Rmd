@@ -18,16 +18,22 @@ output:
 1. **Ask you some questions along the way**
 1. **Including some questions about the assumptions of the open one-sex population projection model we studied in class**
 
-**This assignment will prepare you for the portion of the final where you will conduct a population project across multiple projection intervals on your own.**
+**This assignment will prepare you for the portion of the final where you will project a population across multiple projection intervals on your own.**
 
-**I know this sounds CRAZY but... you will not have to construct any life tables this week.**
+**I know this is CRAZY but you won't have to construct a life table this week!**
 
 # Data collection {.unnumbered}
+
+```{r}
+CHLasfrRR <- readRDS("data/CHLasfrRR.rds")
+mltper_5x1 <- readRDS("data/mltper_5x1.rds")
+fltper_5x1 <- readRDS("data/fltper_5x1.rds")
+```
 
 # About the data {.unnumbered}
 
 You've just loaded the following data from Chile in 1992:
 
-* **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year age groups for Chile in 1992**
-* **`mltper_5x1` gives the annual period life table for males in five-year age groups with the typical columns we've seen in previous weeks**
-* **`fltper_5x1` is the corresponding life table for females**
+* **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year (`Age`) groups. The data comes from the [Human Fertility Database](https://www.humanfertility.org/) (HFD).**
+* **`mltper_5x1` gives the annual period life table for males in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). with the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (to facilitate joins to the ASFR data; it's also the original name of the column in the HMD).**
+* **`fltper_5x1` is the corresponding life table for females.**

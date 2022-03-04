@@ -16,7 +16,7 @@ CHLasfrRR <- HMDHFDplus::readHFDweb(
   )
 ) %>%
   dplyr::filter(Year == 1992) %>%
-  dplyr::select(-Year)
+  dplyr::select(-Year, -OpenInterval)
 saveRDS(CHLasfrRR, "data/CHLasfrRR.rds")
 
 ## Period life tables ----
@@ -32,7 +32,6 @@ mltper_5x1 <- HMDHFDplus::readHMDweb(
   )
 ) %>%
   dplyr::filter(Year == 1992) %>%
-  dplyr::rename(x = Age) %>%
 dplyr::select(-Year, -OpenInterval)
 saveRDS(mltper_5x1, "data/mltper_5x1.rds")
 
@@ -47,6 +46,5 @@ fltper_5x1 <- HMDHFDplus::readHMDweb(
   )
 ) %>%
   dplyr::filter(Year == 1992) %>%
-  dplyr::rename(x = Age) %>%
   dplyr::select(-Year, -OpenInterval)
 saveRDS(fltper_5x1, "data/fltper_5x1.rds")
