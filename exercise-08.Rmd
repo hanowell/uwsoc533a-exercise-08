@@ -10,6 +10,15 @@ output:
     toc_depth: 3
 ---
 
+# Setup {.unnumbered}
+
+```{r}
+# Install pacman
+if (!require("pacman")) install.packages("pacman")
+# p_load function loads packages if installed, or install then loads otherwise
+pacman::p_load(dplyr, knitr, kableExtra, readr)
+```
+
 # Introduction {.unnumbered}
 
 **In this assignment, I will:**
@@ -27,7 +36,7 @@ output:
 ```{r}
 CHLasfrRR <- readRDS("data/CHLasfrRR.rds")
 fltper_5x1 <- readRDS("data/fltper_5x1.rds")
-Population <- readRDS("data/Population.rds")
+Population5 <- readRDS("data/Population5.rds")
 ```
 
 # About the data {.unnumbered}
@@ -35,8 +44,8 @@ Population <- readRDS("data/Population.rds")
 You've just loaded the following data from Chile in 1992:
 
 * **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year (`Age`) groups. The data comes from the [Human Fertility Database](https://www.humanfertility.org/) (HFD).**
-* **`fltper_5x1` gives the annual period life table for females in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). with the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (to facilitate joins to the ASFR data; it's also the original name of the column in the HMD).**
-* ****
+* **`fltper_5x1` gives the annual period life table for females in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). with the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (since it's the original name of the column in the HMD).**
+* **`Population5` gives the age-specific population sizes of females on January 1st (`Female1`) by five-year `Age` groups**
 
 # Save the radix for the life tables
 
@@ -45,9 +54,7 @@ You've just loaded the following data from Chile in 1992:
 1. **For when you are projecting a population with more than one sex (or, more generally, more subgroups), saving the radix of each subgroup allows you to check whether the life tables have the same or different radices**
 1. **You need the radix in subsequent steps even though in the next step you will collapse the two youngest age groups**
 
-```{r}
-
-```
+**We'll accomplish this by saving the collapsed life table as a separate object in the next step.**
 
 # Here's a question for you...
 
@@ -57,12 +64,17 @@ You've just loaded the following data from Chile in 1992:
 
 
 
-# Collapse the age-specific person-years ${}_nL_x$ for the two youngest age groups
+# Collapse the age-specific baseline population sizes and person-years ${}_nL_x$ for the two youngest age groups
 
 **You need to collapse the first two age groups for each life table because we will project age-specific populations with age intervals of equal length to the projection interval (in this case, five years).**
 
 ```{r}
-
+flt_collapsed <- fltper_5x1 %>%
+  dplyr::mutate(Age = if_else(Age < 5L, 0L, Age)) %>%
+  dplyr::with_groups(Age, summarize_at, .vars = vars(Lx, Tx), .funs = sum)
+Population5_collapsed <- Population5 %>%
+  dplyr::mutate(Age = if_else(Age < 5L, 0L, Age)) %>%
+  dplyr::with_groups(Age, summarize, Female1 = sum(Female1))
 ```
 
 # Another question...
@@ -73,6 +85,58 @@ You've just loaded the following data from Chile in 1992:
 
 
 
-# Project survivorship
+# Collapse the age-specific baseline population sizes for the penultimate and open-ended age intervals
 
-## 
+```{r}
+penultimate_age <- Population5_collapsed$Age[nrow(Population5_collapsed) - 1]
+Population5_collapsed <- Population5_collapsed %>%
+  dplyr::mutate(Age = if_else(Age >= penultimate_age, penultimate_age, Age)) %>%
+  dplyr::with_groups(Age, summarize, Female1 = sum(Female1))
+```
+
+# Another question...
+
+**Explain in your own words why we're collapsing the oldest two age groups for the age-specific population sizes we are projecting, but not for the life table we are using to characterize survivorship for our  projection.**
+
+**Answer below:**
+
+
+
+# Project survivors
+
+```{r}
+projection <- Population5_collapsed %>%
+  dplyr::left_join(flt_collapsed) %>%
+  dplyr::mutate(
+    projected_size = dplyr::case_when(
+      # All age groups but the open-ended projected age group
+      Age %>% dplyr::between(5, max(Age) - 5) ~ (
+       dplyr::lag(Female1) * (Lx / dplyr::lag(Lx))
+      ),
+      # Open-ended projected age group
+      Age == max(Age) ~ (
+        # Projecting the penultimate projected age group into the open-ended one
+        dplyr::lag(Female1) * (Lx / dplyr::lag(Lx))
+        # Surviving those already in the open-ended projected age group
+        + Female1 * (Tx / fltper_5x1$Tx[nrow(fltper_5x1)])
+      )
+    )
+  )
+```
+
+# Another question...
+
+**What about the implications of a stationary population for the interpretation of ${}_nL_x$ and $T_x$ allows us to conveniently use these life table columns to estimate survivorship ratios if we are willing to assume the population is approximately stationary over the projection interval?**
+
+**Answer below:**
+
+
+
+# Project births 
+
+```{r}
+projected_births <- CHLasfrRR %>%
+  dplyr::left_join(projection)
+```
+
+
