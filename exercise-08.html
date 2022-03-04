@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ben Hanowell" />
 
-<meta name="date" content="2022-03-03" />
+<meta name="date" content="2022-03-04" />
 
 <title>Exercise 8</title>
 
@@ -243,11 +243,19 @@ div.tocify {
 
 <h1 class="title toc-ignore">Exercise 8</h1>
 <h4 class="author">Ben Hanowell</h4>
-<h4 class="date">2022-03-03</h4>
+<h4 class="date">2022-03-04</h4>
 
 </div>
 
 
+<div id="setup" class="section level1 unnumbered">
+<h1 class="unnumbered">Setup</h1>
+<pre class="r"><code># Install pacman
+if (!require(&quot;pacman&quot;)) install.packages(&quot;pacman&quot;)</code></pre>
+<pre><code>## Loading required package: pacman</code></pre>
+<pre class="r"><code># p_load function loads packages if installed, or install then loads otherwise
+pacman::p_load(dplyr, ggplot2, knitr, kableExtra, readr)</code></pre>
+</div>
 <div id="introduction" class="section level1 unnumbered">
 <h1 class="unnumbered">Introduction</h1>
 <p><strong>In this assignment, I will:</strong></p>
@@ -256,50 +264,138 @@ div.tocify {
 <li><strong>Ask you some questions along the way</strong></li>
 <li><strong>Including some questions about the assumptions of the open one-sex population projection model we studied in class</strong></li>
 </ol>
-<p><strong>This assignment will prepare you for the portion of the final where you will project a population across multiple projection intervals on your own.</strong></p>
+<p><strong>This assignment will prepare you for the portion of the final where you will project a population across multiple projection intervals on your own. I encourage you to run the code and inspect the results.</strong></p>
+<p><strong>Each question below is worth the same number of points, with the total points adding up to 7.</strong></p>
 <p><strong>I know this is CRAZY but you won’t have to construct a life table this week!</strong></p>
 </div>
 <div id="data-collection" class="section level1 unnumbered">
 <h1 class="unnumbered">Data collection</h1>
 <pre class="r"><code>CHLasfrRR &lt;- readRDS(&quot;data/CHLasfrRR.rds&quot;)
 fltper_5x1 &lt;- readRDS(&quot;data/fltper_5x1.rds&quot;)
-Population &lt;- readRDS(&quot;data/Population.rds&quot;)</code></pre>
+Population5 &lt;- readRDS(&quot;data/Population5.rds&quot;)</code></pre>
 </div>
 <div id="about-the-data" class="section level1 unnumbered">
 <h1 class="unnumbered">About the data</h1>
 <p>You’ve just loaded the following data from Chile in 1992:</p>
 <ul>
-<li><strong><code>CHLasfrRR</code> gives the annual period age-specific fertility rate (<code>ASFR</code>) by five-year (<code>Age</code>) groups. The data comes from the <a href="https://www.humanfertility.org/">Human Fertility Database</a> (HFD).</strong></li>
-<li><strong><code>fltper_5x1</code> gives the annual period life table for females in five-year age groups. The life table comes from the <a href="https://mortality.org/">Human Mortality Database</a> (HMD). with the typical columns we’ve seen in previous weeks, except the exact age at the beginning of the interval is a column called <code>Age</code> rather than <code>x</code> (to facilitate joins to the ASFR data; it’s also the original name of the column in the HMD).</strong> * ****</li>
+<li><strong><code>CHLasfrRR</code> gives the annual period age-specific fertility rate (<code>ASFR</code>) by five-year <code>Age</code> groups. The data comes from the <a href="https://www.humanfertility.org/">Human Fertility Database</a> (HFD).</strong></li>
+<li><strong><code>fltper_5x1</code> gives the annual period life table for females in five-year age groups. The life table comes from the <a href="https://mortality.org/">Human Mortality Database</a> (HMD). It has the typical columns we’ve seen in previous weeks, except the exact age at the beginning of the interval is a column called <code>Age</code> rather than <code>x</code> (since it’s the original name of the column in the HMD).</strong></li>
+<li><strong><code>Population5</code> gives the age-specific population sizes of females on January 1st (<code>Female1</code>) by five-year <code>Age</code> groups</strong></li>
 </ul>
 </div>
 <div id="save-the-radix-for-the-life-tables" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Save the radix for the life tables</h1>
-<p><strong>In the subsequent steps, don’t overwrite the original data that provides <span class="math inline">\(l_0\)</span> for males and females, respectively. Don’t do this for two reasons:</strong></p>
+<p><strong>In the subsequent steps, don’t overwrite the original data that provides <span class="math inline">\(l_0\)</span>. Don’t do this for two reasons:</strong></p>
 <ol style="list-style-type: decimal">
-<li><strong>For when you are projecting a population with more than one sex (or, more generally, more subgroups), saving the radix of each subgroup allows you to check whether the life tables have the same or different radices</strong></li>
+<li><strong>For when you are projecting a population with more than one sex (or, more generally, more than one population subgroup), saving the radix of each subgroup allows you to check whether the life tables have the same or different radices</strong></li>
 <li><strong>You need the radix in subsequent steps even though in the next step you will collapse the two youngest age groups</strong></li>
 </ol>
+<p><strong>We’ll accomplish this by saving the collapsed life table as a separate object in the next step.</strong></p>
 </div>
 <div id="heres-a-question-for-you" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Here’s a question for you…</h1>
-<p><strong>Why might you have life tables with a different radix for each sex?</strong></p>
+<p><strong>Why might you have life tables with a different radix for each sex (or more, generally, for each subgroup of the population)?</strong></p>
 <p><strong>Answer below:</strong></p>
 </div>
-<div id="collapse-the-age-specific-person-years-_nl_x-for-the-two-youngest-age-groups" class="section level1" number="3">
-<h1><span class="header-section-number">3</span> Collapse the age-specific person-years <span class="math inline">\({}_nL_x\)</span> for the two youngest age groups</h1>
+<div id="collapse-the-age-specific-baseline-population-sizes-and-person-years-_nl_x-for-the-two-youngest-age-groups" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Collapse the age-specific baseline population sizes and person-years <span class="math inline">\({}_nL_x\)</span> for the two youngest age groups</h1>
 <p><strong>You need to collapse the first two age groups for each life table because we will project age-specific populations with age intervals of equal length to the projection interval (in this case, five years).</strong></p>
+<pre class="r"><code>flt_collapsed &lt;- fltper_5x1 %&gt;%
+  dplyr::mutate(Age = if_else(Age &lt; 5L, 0L, Age)) %&gt;%
+  dplyr::with_groups(Age, summarize_at, .vars = vars(Lx, Tx), .funs = sum)
+Population5_collapsed &lt;- Population5 %&gt;%
+  dplyr::mutate(Age = if_else(Age &lt; 5L, 0L, Age)) %&gt;%
+  dplyr::with_groups(Age, summarize, Female1 = sum(Female1))</code></pre>
 </div>
 <div id="another-question" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> Another question…</h1>
 <p><strong>Why is it convenient to assume age and projection intervals of equal length (i.e. what extra work would we have to do if projection and age intervals were of unequal length)?</strong></p>
 <p><strong>Answer below:</strong></p>
 </div>
-<div id="project-survivorship" class="section level1" number="5">
-<h1><span class="header-section-number">5</span> Project survivorship</h1>
-<div id="section" class="section level2" number="5.1">
-<h2><span class="header-section-number">5.1</span> </h2>
+<div id="collapse-the-age-specific-baseline-population-sizes-for-the-penultimate-and-open-ended-age-intervals" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Collapse the age-specific baseline population sizes for the penultimate and open-ended age intervals</h1>
+<pre class="r"><code>penultimate_age &lt;- Population5_collapsed$Age[nrow(Population5_collapsed) - 1]
+Population5_collapsed &lt;- Population5_collapsed %&gt;%
+  dplyr::mutate(Age = if_else(Age &gt;= penultimate_age, penultimate_age, Age)) %&gt;%
+  dplyr::with_groups(Age, summarize, Female1 = sum(Female1))</code></pre>
 </div>
+<div id="another-question-1" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Another question…</h1>
+<p><strong>Explain in your own words why we’re collapsing the oldest two age groups for the age-specific population sizes we are projecting, but not for the life table we are using to characterize survivorship for our projection.</strong></p>
+<p><strong>Answer below:</strong></p>
+</div>
+<div id="project-survivors" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Project survivors</h1>
+<pre class="r"><code>projection &lt;- Population5_collapsed %&gt;%
+  dplyr::left_join(flt_collapsed) %&gt;%
+  dplyr::mutate(
+    projected_size = dplyr::case_when(
+      # All age groups but the open-ended projected age group
+      Age %&gt;% dplyr::between(5, max(Age) - 5) ~ (
+        # Females from previous age group times survivorship ratio
+        dplyr::lag(Female1) * (Lx / dplyr::lag(Lx))
+      ),
+      # Open-ended projected age group
+      Age == max(Age) ~ (
+        # Projecting the penultimate projected age group into the open-ended one
+        dplyr::lag(Female1) * (Lx / dplyr::lag(Lx))
+        # Surviving those already in the open-ended projected age group
+        + Female1 * (fltper_5x1$Tx[fltper_5x1$Age == max(fltper_5x1$Age)] / Tx)
+      )
+    )
+  )</code></pre>
+<pre><code>## Joining, by = &quot;Age&quot;</code></pre>
+</div>
+<div id="another-question-2" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Another question…</h1>
+<p><strong>What about the implications of a stationary population for the interpretation of <span class="math inline">\({}_nL_x\)</span> and <span class="math inline">\(T_x\)</span> allows us to conveniently use these life table columns to estimate survivorship ratios if we are willing to assume the population is approximately stationary over the projection interval?</strong></p>
+<p><strong>Answer below:</strong></p>
+</div>
+<div id="project-births" class="section level1" number="9">
+<h1><span class="header-section-number">9</span> Project births</h1>
+<pre class="r"><code>projected_births &lt;- CHLasfrRR %&gt;%
+  dplyr::left_join(projection) %&gt;%
+  dplyr::mutate(
+    # ASFR over five years yielded from female person-years lived over that time
+    projected_births = ASFR * 5 * 0.5 * (Female1 + projected_size)
+  ) %&gt;%
+  # Sum up the age-specific birth count
+  dplyr::pull(projected_births) %&gt;%
+  sum()</code></pre>
+<pre><code>## Joining, by = &quot;Age&quot;</code></pre>
+<pre class="r"><code>SRB &lt;- 1.04
+projected_female_births &lt;- (1/(1 + 1.04)) * projected_births</code></pre>
+</div>
+<div id="another-question-3" class="section level1" number="10">
+<h1><span class="header-section-number">10</span> Another question…</h1>
+<p><strong>The sex ratio at birth (SRB) above of 1.04 is taken from the <a href="https://data.worldbank.org/indicator/SP.POP.BRTH.MF?locations=CL">World Bank</a>. If we were to treat our projection as a forecast, what would our forecast assume about the SRB in Chile over the projection interval, and what factors should we consider in judging the reasonableness of that assumption? (Hint: It’s not only that SRB is invariant with age of mother!)</strong></p>
+<p><strong>Answer:</strong></p>
+</div>
+<div id="survive-births-to-end-of-projection-interval-and-add-into-projection" class="section level1" number="11">
+<h1><span class="header-section-number">11</span> Survive births to end of projection interval and add into projection</h1>
+<pre class="r"><code>projection &lt;- projection %&gt;%
+  # Feel in the missing projected size for the youngest age group
+  dplyr::mutate(projected_size = projected_size %&gt;% dplyr::coalesce(
+    projected_female_births * (Lx / (5 * fltper_5x1$lx[fltper_5x1$Age == 0]))
+  ))</code></pre>
+</div>
+<div id="another-question-4" class="section level1" number="12">
+<h1><span class="header-section-number">12</span> Another question…</h1>
+<p><strong>What is the projected mean annualized growth rate for the population?</strong></p>
+</div>
+<div id="yet-another-question" class="section level1" number="13">
+<h1><span class="header-section-number">13</span> Yet another question…</h1>
+<p><strong>Below is a plot of the starting (black) and projected (<span style="color:orange">orange</span>) age structure for Chile at the start of 1992 and 1997, respectively. Extrapolation from one projection interval is usually to be avoided, but if you were compelled to do so, what would you say in general is projected to happen to the age structure of this population over 20 years from 1992 if current age-specific moratlity and fertility conditions maintain their 1992 values?</strong></p>
+<p><img src="data:image/png;base64,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" width="672" /></p>
+<p><strong>Answer:</strong></p>
+</div>
+<div id="just-one-last-question" class="section level1" number="14">
+<h1><span class="header-section-number">14</span> Just one last question…</h1>
+<p><strong>Recall the immigration adjustment for the projected population in a given age interval (aside from the youngest or oldest projected age interval) in “Immigration adjustment to step 1” in our section on <a href="https://hanowell.github.io/uwsoc533a/population-projections.html#projection-of-an-open-population">projection of an open population</a>. This adjustment assumes that survivorship among immigrants is the same as survivorship among non-immigrants. Below, use <span class="math inline">\(\LaTeX\)</span> to write an expansion of this adjustment that relaxes that assumption, allowing survivorship to vary between immigrants and non-immigrants. Then answer the following questions:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>Without further expansion of our model, what does the projection assume about the descendants of migrants?</strong></li>
+<li><strong>what extra population estimates would you need to collect in order to put your expansion to work?</strong></li>
+</ol>
 </div>
 
 

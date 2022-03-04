@@ -16,7 +16,7 @@ output:
 # Install pacman
 if (!require("pacman")) install.packages("pacman")
 # p_load function loads packages if installed, or install then loads otherwise
-pacman::p_load(dplyr, knitr, kableExtra, readr)
+pacman::p_load(dplyr, ggplot2, knitr, kableExtra, readr)
 ```
 
 # Introduction {.unnumbered}
@@ -27,7 +27,9 @@ pacman::p_load(dplyr, knitr, kableExtra, readr)
 1. **Ask you some questions along the way**
 1. **Including some questions about the assumptions of the open one-sex population projection model we studied in class**
 
-**This assignment will prepare you for the portion of the final where you will project a population across multiple projection intervals on your own.**
+**This assignment will prepare you for the portion of the final where you will project a population across multiple projection intervals on your own. I encourage you to run the code and inspect the results.**
+
+**Each question below is worth the same number of points, with the total points adding up to 7.**
 
 **I know this is CRAZY but you won't have to construct a life table this week!**
 
@@ -43,22 +45,22 @@ Population5 <- readRDS("data/Population5.rds")
 
 You've just loaded the following data from Chile in 1992:
 
-* **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year (`Age`) groups. The data comes from the [Human Fertility Database](https://www.humanfertility.org/) (HFD).**
-* **`fltper_5x1` gives the annual period life table for females in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). with the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (since it's the original name of the column in the HMD).**
+* **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year `Age` groups. The data comes from the [Human Fertility Database](https://www.humanfertility.org/) (HFD).**
+* **`fltper_5x1` gives the annual period life table for females in five-year age groups. The life table comes from the [Human Mortality Database](https://mortality.org/) (HMD). It has the typical columns we've seen in previous weeks, except the exact age at the beginning of the interval is a column called `Age` rather than `x` (since it's the original name of the column in the HMD).**
 * **`Population5` gives the age-specific population sizes of females on January 1st (`Female1`) by five-year `Age` groups**
 
 # Save the radix for the life tables
 
-**In the subsequent steps, don't overwrite the original data that provides $l_0$ for males and females, respectively. Don't do this for two reasons:**
+**In the subsequent steps, don't overwrite the original data that provides $l_0$. Don't do this for two reasons:**
 
-1. **For when you are projecting a population with more than one sex (or, more generally, more subgroups), saving the radix of each subgroup allows you to check whether the life tables have the same or different radices**
+1. **For when you are projecting a population with more than one sex (or, more generally, more than one population subgroup), saving the radix of each subgroup allows you to check whether the life tables have the same or different radices**
 1. **You need the radix in subsequent steps even though in the next step you will collapse the two youngest age groups**
 
 **We'll accomplish this by saving the collapsed life table as a separate object in the next step.**
 
 # Here's a question for you...
 
-**Why might you have life tables with a different radix for each sex?**
+**Why might you have life tables with a different radix for each sex (or more, generally, for each subgroup of the population)?**
 
 **Answer below:**
 
@@ -111,14 +113,15 @@ projection <- Population5_collapsed %>%
     projected_size = dplyr::case_when(
       # All age groups but the open-ended projected age group
       Age %>% dplyr::between(5, max(Age) - 5) ~ (
-       dplyr::lag(Female1) * (Lx / dplyr::lag(Lx))
+        # Females from previous age group times survivorship ratio
+        dplyr::lag(Female1) * (Lx / dplyr::lag(Lx))
       ),
       # Open-ended projected age group
       Age == max(Age) ~ (
         # Projecting the penultimate projected age group into the open-ended one
         dplyr::lag(Female1) * (Lx / dplyr::lag(Lx))
         # Surviving those already in the open-ended projected age group
-        + Female1 * (Tx / fltper_5x1$Tx[nrow(fltper_5x1)])
+        + Female1 * (fltper_5x1$Tx[fltper_5x1$Age == max(fltper_5x1$Age)] / Tx)
       )
     )
   )
@@ -132,11 +135,70 @@ projection <- Population5_collapsed %>%
 
 
 
-# Project births 
+# Project births
 
 ```{r}
 projected_births <- CHLasfrRR %>%
-  dplyr::left_join(projection)
+  dplyr::left_join(projection) %>%
+  dplyr::mutate(
+    # ASFR over five years yielded from female person-years lived over that time
+    projected_births = ASFR * 5 * 0.5 * (Female1 + projected_size)
+  ) %>%
+  # Sum up the age-specific birth count
+  dplyr::pull(projected_births) %>%
+  sum()
+SRB <- 1.04
+projected_female_births <- (1/(1 + 1.04)) * projected_births
+```
+
+# Another question...
+
+**The sex ratio at birth (SRB) above of 1.04 is taken from the [World Bank](https://data.worldbank.org/indicator/SP.POP.BRTH.MF?locations=CL). If we were to treat our projection as a forecast, what would our forecast assume about the SRB in Chile over the projection interval, and what factors should we consider in judging the reasonableness of that assumption? (Hint: It's not only that SRB is invariant with age of mother!)**
+
+**Answer:**
+
+
+
+# Survive births to end of projection interval and add into projection
+
+```{r}
+projection <- projection %>%
+  # Feel in the missing projected size for the youngest age group
+  dplyr::mutate(projected_size = projected_size %>% dplyr::coalesce(
+    projected_female_births * (Lx / (5 * fltper_5x1$lx[fltper_5x1$Age == 0]))
+  ))
+```
+
+# Another question...
+
+**What is the projected mean annualized growth rate for the population?**
+
+# Yet another question...
+
+**Below is a plot of the starting (black) and projected (<span style='color:orange'>orange</span>) age structure for Chile at the start of 1992 and 1997, respectively. Extrapolation from one projection interval is usually to be avoided, but if you were compelled to do so, what would you say in general is projected to happen to the age structure of this population over 20 years from 1992 if current age-specific moratlity and fertility conditions maintain their 1992 values?**
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+projection %>%
+  dplyr::mutate(
+    cx = Female1 / sum(Female1),
+    projected_cx = projected_size / sum(projected_size)
+  ) %>%
+  ggplot2::ggplot() +
+  ggplot2::aes(x = Age) +
+  ggplot2::geom_line(aes(y = cx), color = "black") +
+  ggplot2::geom_line(aes(y = projected_cx), color = "orange") +
+  ggplot2::labs(x = "Age", y = "Population\nstructure") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(panel.grid = element_blank(),
+                 axis.title.y = element_text(angle = 0))
 ```
 
 
+**Answer:**
+
+# Just one last question...
+
+**Recall the immigration adjustment for the projected population in a given age interval (aside from the youngest or oldest projected age interval) in "Immigration adjustment to step 1" in our section on [projection of an open population](https://hanowell.github.io/uwsoc533a/population-projections.html#projection-of-an-open-population). This adjustment assumes that survivorship among immigrants is the same as survivorship among non-immigrants. Below, use $\LaTeX$ to write an expansion of this adjustment that relaxes that assumption, allowing survivorship to vary between immigrants and non-immigrants. Then answer the following questions:**
+
+1. **Without further expansion of our model, what does the projection assume about the descendants of migrants?**
+1. **what extra population estimates would you need to collect in order to put your expansion to work?**
