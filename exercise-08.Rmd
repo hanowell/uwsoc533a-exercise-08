@@ -1,0 +1,33 @@
+---
+title: "Exercise 8"
+author: 'Ben Hanowell'
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    toc_float: true
+    toc_depth: 3
+---
+
+# Introduction {.unnumbered}
+
+**In this assignment, I will:**
+
+1. **Walk you through the projection of a two-sex closed population assuming constant age-specific fertility and mortality rates**
+1. **Ask you some questions along the way**
+1. **Including some questions about the assumptions of the open one-sex population projection model we studied in class**
+
+**This assignment will prepare you for the portion of the final where you will conduct a population project across multiple projection intervals on your own.**
+
+**I know this sounds CRAZY but... you will not have to construct any life tables this week.**
+
+# Data collection {.unnumbered}
+
+# About the data {.unnumbered}
+
+You've just loaded the following data from Chile in 1992:
+
+* **`CHLasfrRR` gives the annual period age-specific fertility rate (`ASFR`) by five-year age groups for Chile in 1992**
+* **`mltper_5x1` gives the annual period life table for males in five-year age groups with the typical columns we've seen in previous weeks**
+* **`fltper_5x1` is the corresponding life table for females**
